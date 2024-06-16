@@ -1,7 +1,8 @@
 from aiogram import types, Router, F
 from aiogram.filters.command import Command
-from aiogram.types import FSInputFile
-
+from aiogram.fsm.context import FSMContext
+from handlers.survey import start_survey
+from handlers.menu import start_menu
 
 start_router = Router()
 
@@ -19,12 +20,11 @@ async def start_handler(message: types.Message):
                 types.InlineKeyboardButton(text="Контакты", url="https://api.whatsapp.com/send/?phone=996700250000")
             ],
             [
-                types.InlineKeyboardButton(text="Отзывы",
-                                           url="https://2gis.kg/bishkek/firm/70000001050087092/tab/reviews")
+                types.InlineKeyboardButton(text="Меню", callback_data="menu")
             ],
             [
-                types.InlineKeyboardButton(text="Меню", callback_data="reply_photo")
-            ],
+                types.InlineKeyboardButton(text="Оставить отзыв", callback_data="survey")
+            ]
         ]
     )
 
@@ -33,8 +33,15 @@ async def start_handler(message: types.Message):
                          reply_markup=keyboard)
 
 
-@start_router.callback_query(F.data == "reply_photo")
-async def reply_photo_handler(callback: types.CallbackQuery):
-    file = FSInputFile("menu/меню.PNG")
-    await callback.message.reply_photo(photo=file, caption="Меню")
+@start_router.callback_query(F.data == "menu")
+async def menu_handler(callback: types.CallbackQuery):
+    await start_menu(callback.message)
     await callback.answer()
+
+
+@start_router.callback_query(F.data == "survey")
+async def survey_handler(callback: types.CallbackQuery, state: FSMContext):
+    await start_survey(callback.message, state)
+    await callback.answer()
+
+
