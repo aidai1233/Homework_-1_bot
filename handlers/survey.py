@@ -4,7 +4,9 @@ from aiogram import types, Router
 from aiogram.filters.command import Command
 from datetime import datetime
 import re
+from database.database import Database
 
+db = Database("db.sqlite3")
 survey_router = Router()
 
 
@@ -124,5 +126,10 @@ async def process_comments(message: types.Message, state: FSMContext):
     await state.update_data(comment=message.text)
     data = await state.get_data()
     print("Data", data)
+    await db.execute(
+        "INSERT INTO review (name, phone, date, food,"
+        " cleanliness, comment) VALUES (?, ?, ?, ?, ?, ?)",
+        (data['name'], data['phone'], data['date'], data['food'], data['cleanliness'], data['comment'])
+    )
     await state.clear()
     await message.answer("Спасибо за прохождение опроса", reply_markup=types.ReplyKeyboardRemove())
