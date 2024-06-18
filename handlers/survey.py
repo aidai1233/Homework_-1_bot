@@ -6,7 +6,7 @@ from datetime import datetime
 import re
 from database.database import Database
 
-db = Database("db.sqlite3")
+db = Database("db.sqlite")
 survey_router = Router()
 
 
@@ -129,7 +129,7 @@ async def process_comments(message: types.Message, state: FSMContext):
     await db.execute(
         "INSERT INTO review (name, phone, date, food,"
         " cleanliness, comment) VALUES (?, ?, ?, ?, ?, ?)",
-        (data['name'], data['phone'], data['date'], data['food'], data['cleanliness'], data['comment'])
+        (data['name'], data['phone'], data['date'], data['food'], data['cleanliness'],data['comment'])
     )
     await state.clear()
     await message.answer("Спасибо за прохождение опроса", reply_markup=types.ReplyKeyboardRemove())
