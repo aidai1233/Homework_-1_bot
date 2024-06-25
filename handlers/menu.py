@@ -1,5 +1,6 @@
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters.command import Command
+from config import database
 
 menu_router = Router()
 
@@ -22,21 +23,21 @@ async def start_menu(message: types.Message):
     await message.answer("Выберите категорию:", reply_markup=kb)
 
 
-menu_items = {
-    "Завтраки": ["Омлет", "Блины", "Мюсли"],
-    "Паста": ["Карбонара", "Болоньезе", "Альфредо"],
-    "Салаты": ["Цезарь", "Греческий", "Овощной микс"],
-    "Десерты": ["Тирамису", "Панна котта", "Чизкейк"]
-}
+categories = ("Завтраки", "Паста", "Салаты", "Десерты")
 
 
-@menu_router.message(lambda message: message.text in menu_items.keys())
-async def menu_category(message: types.Message):
-    category = message.text
-    if category in menu_items:
-        kb = types.ReplyKeyboardRemove()
-        await message.answer(f"Блюда в категории \"{category}\":", reply_markup=kb)
-        for item in menu_items[category]:
-            await message.answer(f"- {item}")
-    else:
-        await message.answer("Выберите категорию из предложенных вариантов.")
+@menu_router.message(F.text.lower().in_(categories))
+async def show_dishes_by_category(message: types.Message):
+    kb = types.ReplyKeyboardRemove()
+    category = message.text.capitalize()
+    dishes = await database.fetch_all("""
+        SELECT dishes.name, dishes.price 
+        FROM dishes
+        INNER JOIN categories ON dishes.category_id = categories.id
+        WHERE categories.name = ?
+    """, (category,))
+    await message.answer(f"Блюда из категории {categories}", reply_markup=kb)
+
+    for dish in dishes:
+        message_text = f"{dish['name']} - {dish['price']} сом"
+        await message.answer(message_text)
