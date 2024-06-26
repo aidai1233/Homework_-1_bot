@@ -8,6 +8,7 @@ from handlers.myinfo import myinfo_router
 from handlers.survey import survey_router
 from handlers.menu import menu_router
 from database.database import Database
+from handlers.parse import parse_router
 
 database = Database("db.sqlite")
 
@@ -21,6 +22,7 @@ async def main():
         types.BotCommand(command="start", description="Начало"),
         types.BotCommand(command="menu", description="Меню"),
         types.BotCommand(command="opros", description="Пройдите на опрос"),
+        types.BotCommand(command="parse", description="Начать парсинг объявлений")
     ])
 
     dp.include_router(start_router)
@@ -28,6 +30,7 @@ async def main():
     dp.include_router(myinfo_router)
     dp.include_router(survey_router)
     dp.include_router(menu_router)
+    dp.include_router(parse_router)
     dp.startup.register(on_startup)
     await dp.start_polling(bot)
 
