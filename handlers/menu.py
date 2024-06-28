@@ -26,7 +26,7 @@ async def start_menu(message: types.Message):
 categories = ("Завтраки", "Паста", "Салаты", "Десерты")
 
 
-@menu_router.message(F.text.lower().in_(categories))
+@menu_router.message(F.text.capitalize().in_(categories))
 async def show_dishes_by_category(message: types.Message):
     kb = types.ReplyKeyboardRemove()
     category = message.text.capitalize()
